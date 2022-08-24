@@ -4,6 +4,7 @@ using RogueCS.SDLWrapper.Graphics.Interfaces;
 using static SDL2.SDL;
 
 namespace RogueCS.SDLWrapper.Graphics.Implementations {
+
     internal class SDLGraphics : ISDLGraphics {
 
       #region fields
