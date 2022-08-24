@@ -1,34 +1,46 @@
-﻿using RogueCS.SDL.Graphics.Interfaces;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 using static SDL2.SDL;
 
-namespace RogueCS.SDL.Graphics.Implementations {
+namespace RogueCS.SDLWrapper.Graphics.Implementations {
 
-    internal class TextSheet : ITextSheet {
-        
-		// Define the glyph range that will be loaded into
-		const char GLYPH_START = ' ';
-		const char GLYPH_END   = 'z';
+    public class TextSheet : IDisposable {
+
+      #region constants
+
+        // Define the glyph range that will be loaded into
+        public const char GLYPH_START = ' ';
+		public const char GLYPH_END   = 'z';
 
 		// MAX_GLYPHS determines the size of the memory block we
 		// allocate for _pGlyphs.   
-		const int MAX_GLYPHS = 128;
+		public const int MAX_GLYPHS = 128;
 
-		IntPtr     _pTextSheet;
-		SDL_Rect[] _pGlyphs;
+      #endregion constants
+
+      #region fields
+
+		public readonly IntPtr     pTexture;
+		public readonly SDL_Rect[] Glyphs;
 
 		// The width and height of the characters in the loaded
 		// font. 
-		int _characterWidth;
-		int _characterHeight;
+		public readonly int CharacterWidth;
+		public readonly int CharacterHeight;
 
 		// Calculated based on the number of glyphs in the sheet
 		// and _characterWidth and _characterHeight
-		int _textureWidth;
-		int _textureHeight;
+		public readonly int TextureWidth;
+		public readonly int TextureHeight;
 
-		public TextSheet(
+		private bool _disposed = false;
+
+      #endregion fields
+
+      #region ctor
+
+        public TextSheet(
+			IntPtr pRenderer,
 			string filename,
 			int    fontSize,
 			int    characterWidth,
@@ -37,15 +49,15 @@ namespace RogueCS.SDL.Graphics.Implementations {
 			byte   g,
 			byte   b
 		) {
-			_characterWidth  = characterWidth;
-			_characterHeight = characterHeight;
+			CharacterWidth  = characterWidth;
+			CharacterHeight = characterHeight;
 
 			// This is not a perfect calculation to make the characters tightly in a
 			// texture. It is over-sized, but just a bit, so good enough.
-			_textureWidth  = (int)(Math.Sqrt((GLYPH_END - GLYPH_START)) + 2) * _characterWidth;
-			_textureHeight = (int)(Math.Sqrt((GLYPH_END - GLYPH_START)) + 2) * _characterHeight;
+			TextureWidth  = (int)(Math.Sqrt((GLYPH_END - GLYPH_START)) + 2) * CharacterWidth;
+			TextureHeight = (int)(Math.Sqrt((GLYPH_END - GLYPH_START)) + 2) * CharacterHeight;
 
-			_pGlyphs = new SDL_Rect[MAX_GLYPHS];
+			Glyphs = new SDL_Rect[MAX_GLYPHS];
 
 			// Ensure that SDL_TTF is initialized. This method should be fine to call
 			// repeatedly.
@@ -59,7 +71,7 @@ namespace RogueCS.SDL.Graphics.Implementations {
 			// The surface we will copy pCharSurfaces to. When it
 			// we have copied all chars to this surface, it will be
 			// copied into the _pSDLTextSheet.
-			IntPtr pTextureSurface = SDL_CreateRGBSurface(0, _textureWidth, _textureHeight, 32, 0, 0, 0, 0xff);
+			IntPtr pTextureSurface = SDL_CreateRGBSurface(0, TextureWidth, TextureHeight, 32, 0, 0, 0, 0xff);
 			if (pTextureSurface == IntPtr.Zero)
 				throw new Exception($"Failed to create surface, ${SDL_GetError()}");
 
@@ -82,20 +94,20 @@ namespace RogueCS.SDL.Graphics.Implementations {
 				var source = new SDL_Rect { x = 0, y = 0, w = 0, h = 0 };
 				SDL2.SDL_ttf.TTF_SizeText(pFont, i.ToString(), out source.w, out source.h);
 
-				if (dest.x + _characterWidth >= _textureWidth) {
+				if (dest.x + CharacterWidth >= TextureWidth) {
 					dest.x = 0;
-					dest.y += _characterHeight;
+					dest.y += CharacterHeight;
 
-					if (dest.y + _characterHeight >= _textureHeight) {
+					if (dest.y + CharacterHeight >= TextureHeight) {
 						throw new Exception(
-							$"Out of glyph space in {_textureWidth}x{_textureHeight} font atlas texture map. {SDL_GetError()}"
+							$"Out of glyph space in {TextureWidth}x{TextureHeight} font atlas texture map. {SDL_GetError()}"
 						);
 					}
 				}
 
 				SDL_BlitScaled(pCharSurface, ref source, pTextureSurface, ref dest);
 
-				var glyphRect = _pGlyphs[i];
+				var glyphRect = Glyphs[i];
 
 				glyphRect.x = dest.x;
 				glyphRect.y = dest.y;
@@ -104,45 +116,36 @@ namespace RogueCS.SDL.Graphics.Implementations {
 
 				SDL_FreeSurface(pCharSurface);
 
-				dest.x += _characterWidth;
+				dest.x += CharacterWidth;
 			}
 
-			_pTextSheet = SDL_CreateTextureFromSurface(
-				GET_RENDERER,
+			pTexture = SDL_CreateTextureFromSurface(
+				pRenderer,
 				pTextureSurface
-			)
-        }
-
-		public int CharacterHeight => _characterHeight;
-
-		public int CharacterWidth => _characterHeight;
-
-        public void RenderChar(char c, SDL_Point targetLocation) {
-
-			if (c < GLYPH_START || c > GLYPH_END)
-				throw new Exception($"character out of range {c}");
-
-			var targetRect = new SDL_Rect {
-				x = targetLocation.x,
-				y = targetLocation.y,
-				w = _characterWidth,
-				h = _characterHeight
-			};
-
-			SDL_RenderCopy(
-				static_cast<SDLImplementation*>(sdl)->GetRenderer(),
-				_pTextSheet,
-				ref _pGlyphs[c],
-				ref targetRect
 			);
         }
 
-        public void RenderString(string s, SDL_Point targetLocation) {
-			SDL_Point currentLocation = targetLocation;
-			foreach (var c in s) {
-				RenderChar(c, targetLocation);
-				currentLocation.x += _characterWidth;
-			};
-        }
+      #endregion ctor
+
+      #region IDisposable
+
+        public void Dispose() {
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		public void Dispose(bool disposing) {
+			if (_disposed)
+				return;
+
+			if(pTexture != IntPtr.Zero) {
+				SDL_DestroyTexture(pTexture);
+			}
+
+			_disposed = true;
+		}
+
+      #endregion IDisposable
+
     }
 }
