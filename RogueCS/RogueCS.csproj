@@ -13,9 +13,6 @@
 
   <ItemGroup>
     <Folder Include="Engine\Interfaces\" />
-    <Folder Include="Engine\Implementations\" />
-    <Folder Include="UI\Interfaces\" />
-    <Folder Include="UI\Implementations\" />
   </ItemGroup>
 
 </Project>

@@ -11,12 +11,10 @@ namespace RogueCS.SDLWrapper.Graphics.Implementations {
 
         readonly ISDLCore _sdl;
 
-        readonly int _topLevelWindowWidth;
-        readonly int _topLevelWindowHeight;
+        readonly SDL_Rect _topLevelRect;
 
         readonly IntPtr _pRenderer;
         readonly IntPtr _pWindow;
-
 
         private bool _disposed = false;
 
@@ -30,18 +28,22 @@ namespace RogueCS.SDLWrapper.Graphics.Implementations {
             int  topLevelWindowHeight
         ) {
             _sdl                  = sdl;
-            _topLevelWindowWidth  = topLevelWindowWidth;
-            _topLevelWindowHeight = topLevelWindowHeight;
+
+            _topLevelRect = new SDL_Rect {
+                x = 0,
+                y = 0,
+                w = topLevelWindowWidth,
+                h = topLevelWindowHeight
+            };
 
 	        SDL_Log("Init SDL window.");
 
             _pWindow = SDL2.SDL.SDL_CreateWindow(
-                
-               "SDL Tutorial",
+               "RogueCS",
                SDL_WINDOWPOS_UNDEFINED,
                SDL_WINDOWPOS_UNDEFINED,
-               _topLevelWindowWidth,
-               _topLevelWindowHeight,
+               topLevelWindowWidth,
+               topLevelWindowHeight,
                SDL_WindowFlags.SDL_WINDOW_SHOWN
             );
 
@@ -95,31 +97,29 @@ namespace RogueCS.SDLWrapper.Graphics.Implementations {
 
       #region ISDLGraphics
 
-        public int TopLevelWindowHeight => _topLevelWindowHeight;
-        public int TopLevelWindowWidth  => _topLevelWindowWidth;
+        public SDL_Rect TopLevelRect => _topLevelRect;
 
         public TextSheet CreateTextSheet(string filename, int fontSize, int characterWidth, int characterHeight, byte r, byte g, byte b) {
             return new TextSheet(_pRenderer, filename, fontSize, characterWidth, characterHeight, r, g, b);
         }
 
         public void RenderClear() {
-            SDL2.SDL.SDL_RenderClear(_pRenderer);
+            SDL_RenderClear(_pRenderer);
         }
 
-        public void RenderLines(SDL2.SDL.SDL_Point[] points) {
-            SDL2.SDL.SDL_RenderDrawLines(_pRenderer, points, points.Length);
+        public void RenderLines(SDL_Point[] points) {
+            SDL_RenderDrawLines(_pRenderer, points, points.Length);
         }
 
         public void RenderPresent() {
-            SDL2.SDL.SDL_RenderPresent(_pRenderer);
+            SDL_RenderPresent(_pRenderer);
         }
 
-        public void SetRenderDrawColor(SDL2.SDL.SDL_Color color) {
-            SDL2.SDL.SDL_SetRenderDrawColor(_pRenderer, color.r, color.g, color.b, color.a);
+        public void SetRenderDrawColor(SDL_Color color) {
+            SDL_SetRenderDrawColor(_pRenderer, color.r, color.g, color.b, color.a);
         }
 
-
-        public void RenderChar(char c, SDL_Point location, TextSheet textSheet) {
+        public void RenderChar(char c, in SDL_Point location, TextSheet textSheet) {
 			if (c < TextSheet.GLYPH_START || c > TextSheet.GLYPH_END)
 				throw new Exception($"character out of range {c}");
 
@@ -136,10 +136,9 @@ namespace RogueCS.SDLWrapper.Graphics.Implementations {
 				ref textSheet.Glyphs[c],
 				ref targetRect
 			);
-
         }
 
-        public void RenderString(string s, SDL_Point location, TextSheet textSheet) {
+        public void RenderString(string s, in SDL_Point location, TextSheet textSheet) {
 			SDL_Point currentLocation = location;
             var characterWidth        = textSheet.CharacterWidth;
 
@@ -147,6 +146,10 @@ namespace RogueCS.SDLWrapper.Graphics.Implementations {
 				RenderChar(c, location, textSheet);
 				currentLocation.x += characterWidth;
 			};
+        }
+
+        public ISDLCore GetSDLCore() {
+            return _sdl;
         }
 
       #endregion ISDLGraphics

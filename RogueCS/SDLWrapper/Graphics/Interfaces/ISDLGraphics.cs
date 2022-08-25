@@ -1,11 +1,11 @@
-﻿using RogueCS.SDLWrapper.Graphics.Implementations;
+﻿using RogueCS.SDLWrapper.Common.Interfaces;
+using RogueCS.SDLWrapper.Graphics.Implementations;
 using static SDL2.SDL;
 
 namespace RogueCS.SDLWrapper.Graphics.Interfaces {
     public interface ISDLGraphics : IDisposable {
 
-        int TopLevelWindowWidth  { get; }
-        int TopLevelWindowHeight { get; }
+        SDL_Rect TopLevelRect { get; }
 
         void RenderClear();
         void RenderPresent();
@@ -23,8 +23,10 @@ namespace RogueCS.SDLWrapper.Graphics.Interfaces {
         void SetRenderDrawColor(SDL_Color color);
         void RenderLines(SDL_Point[] points);
 
-        void RenderChar(char c, SDL_Point location, TextSheet textSheet);
-        void RenderString(string s, SDL_Point location, TextSheet textSheet);
+        void RenderChar(char c, in SDL_Point location, TextSheet textSheet);
+        void RenderString(string s, in SDL_Point location, TextSheet textSheet);
+
+        ISDLCore GetSDLCore();
 
     }
 }
