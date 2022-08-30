@@ -1,0 +1,18 @@
+using static SDL2.SDL;
+
+namespace RogueCS.Engine.Implementations.Maps.MapPart {
+
+    public class MapPartData {
+
+        public int Width  { get; set; }
+        public int Height { get; set; }
+
+        public string? pallete { get; set; }
+
+        // holds the data contained in the map file. We have _height strings in the vector,
+        // and each string is exactly _width characters
+        List<string>?       Data       { get; set; }
+        List<string>?       Attributes { get; set; }
+
+    }
+}

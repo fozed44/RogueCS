@@ -1,0 +1,10 @@
+{
+    "Map": [ 
+        { "Char": "x", "TileId": "d_wall"  },
+        { "Char": ".", "TileId": "d_floor" },
+        { "Char": "s", "TileId": "d_water" },
+        { "Char": "v", "TileId": "d_stairs_down" },
+        { "Char": "^", "TileId": "d_stairs_up" },
+        { "Char": " ", "TileId": "d_empty" }
+    ]
+}

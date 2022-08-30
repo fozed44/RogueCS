@@ -8,11 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
     <PackageReference Include="ppy.SDL2-CS" Version="1.0.565-alpha" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Engine\Interfaces\" />
-  </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy ./assets $(OutDir)/assets /s /y&#xD;&#xA;" />
+  </Target>
 
 </Project>

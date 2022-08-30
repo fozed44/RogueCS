@@ -1,0 +1,38 @@
+{
+    "bmp-filename": "dw.bmp",
+    "tile-width": 16,
+    "tile-height": 16,
+    "tiles": [
+        {
+            "x": 0, "y": 0,
+            "tile-id": "d_water",
+            "attributes": [ "block-player" ]
+        },
+        {
+            "x": 9, "y": 4,
+            "tile-id": "d_floor",
+            "attributes": []
+        },
+        {
+            "x": 8, "y": 4,
+            "tile-id": "d_wall",
+            "attributes": [ "block-player", "block-light" ]
+        },
+        {
+            "x": 30, "y": 2,
+            "tile-id": "d_stairs_down",
+            "attributes": [ ]
+        },
+        {
+            "x": 30, "y": 3,
+            "tile-id": "d_stairs_up",
+            "attributes": [ ]
+        },
+        {
+            "x": 10, "y": 5,
+            "tile-id": "d_empty",
+            "attributes": [ ]
+        }
+    ]
+
+}

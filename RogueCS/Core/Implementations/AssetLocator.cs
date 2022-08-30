@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
 namespace RogueCS.Core.Implementations {
-    public class Assets : IAssets {
+    public class AssetLocator : IAssetLocator {
 
       #region constants
 
@@ -53,7 +53,7 @@ namespace RogueCS.Core.Implementations {
 
       #region ctor
 
-        public Assets() { }
+        public AssetLocator() { }
 
       #endregion ctor
 
@@ -75,16 +75,16 @@ namespace RogueCS.Core.Implementations {
         public string GetAssetDirectory(BasicAsset assetType) {
  
             switch (assetType) {
-                case BasicAsset.EXECUTABLE:
+                case BasicAsset.Executable:
                     return Path.GetDirectoryName(
                         Assembly.GetEntryAssembly()!.Location
                     )!;
-                case BasicAsset.ASSETS:
+                case BasicAsset.Assets:
                     return Path.Combine(
-                        GetAssetDirectory(BasicAsset.EXECUTABLE),
+                        GetAssetDirectory(BasicAsset.Executable),
                         ASSET_SUB_DIRECTORY
                     );
-                case BasicAsset.JSON_MAP:
+                case BasicAsset.MapPart:
                     return Path.Combine(
                         GetAssetDirectory(BasicAsset.ASSETS),
                         JSON_MAP_SUB_DIRECTORY
@@ -121,13 +121,13 @@ namespace RogueCS.Core.Implementations {
 
         public string GetWorldAssetDirectory(string worldName, WorldAsset worldAsset) {
             switch (worldAsset) {
-                case WorldAsset.COMPILED_TILE_SHEET_BMP:
+                case WorldAsset.CompiledTileSheetBmp:
                     return Path.Combine(
                         GetWorldDirectory(worldName),
                         COMPILED_TILE_SHEET_JSON_SUB_DIRECTORY
                     );
 
-                case WorldAsset.COMPILED_TILE_SHEET_JSON:
+                case WorldAsset.CompiledTileSheetJson:
                     return Path.Combine(
                         GetWorldDirectory(worldName),
                         COMPILED_TILE_SHEET_JSON_SUB_DIRECTORY
